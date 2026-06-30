@@ -4,6 +4,12 @@ import re
 import json
 from prompts import SAFETY_PROMPT
 
+from rapidfuzz import fuzz
+from utils import normalize_text
+from config import SIMILARITY_THRESHOLD
+
+
+
 SAFETY_RULES = {
     "death_prediction": [
         r"\bdeath\b",
@@ -69,6 +75,7 @@ def llm_safety(chat):
     except Exception:
         return False, ["llm_validation_failed"]
 
+
 def rule_based_safety(chat):
     assistant_text = " ".join(
         msg["content"]
@@ -111,6 +118,37 @@ def rule_based_safety(chat):
     return len(violations) == 0, violations
 
 
+def find_duplicates(chats):
+    processed = []
+
+    for i, chat in enumerate(chats):
+        text = " ".join(
+            msg["content"]
+            for msg in chat["messages"]
+            if msg["role"] != "system"
+        )
+
+        processed.append((i, normalize_text(text)))
+
+    duplicates = []
+
+    for i in range(len(processed)):
+        idx1, text1 = processed[i]
+
+        for j in range(i + 1, len(processed)):
+            idx2, text2 = processed[j]
+
+            score = fuzz.ratio(text1, text2)
+
+            if score >= SIMILARITY_THRESHOLD:
+                duplicates.append({
+                    "chat_1": idx1 + 1,
+                    "chat_2": idx2 + 1,
+                    "similarity": score
+                })
+
+    return duplicates
+
 
 def main():
     chats = load_jsonl(INPUT_FILE)
@@ -140,9 +178,19 @@ def main():
         else:
             print(f"Chat {i} LLM Violations: {llm_violations}")
     
-    
+    duplicates = find_duplicates(chats)
+
+    if duplicates:
+        print("\nDuplicate Chats:")
+        for dup in duplicates:
+            print(
+                f"Chat {dup['chat_1']} <-> Chat {dup['chat_2']} "
+                f"({dup['similarity']:.1f}%)"
+            )
+
     print(f"\nValid Chats : {valid}/{len(chats)}")
     print(f"Rule Safe   : {safe}/{valid}")
+    print(f"Duplicates  : {len(duplicates)}")
 
 
 if __name__ == "__main__":
