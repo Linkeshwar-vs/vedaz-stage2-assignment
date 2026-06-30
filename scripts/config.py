@@ -1,11 +1,12 @@
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DATA_DIR = BASE_DIR / "data"
-REPORTS_DIR = BASE_DIR / "reports"
 
-INPUT_FILE = DATA_DIR / "input.jsonl"
+DATA_DIR = PROJECT_ROOT / "data"
+REPORTS_DIR = PROJECT_ROOT / "reports"
+
+INPUT_FILE = DATA_DIR / "vedaz_astrologer_finetune.jsonl"
 TRAIN_FILE = DATA_DIR / "train.jsonl"
 TEST_FILE = DATA_DIR / "test.jsonl"
 GENERATED_FILE = DATA_DIR / "generated.jsonl"
