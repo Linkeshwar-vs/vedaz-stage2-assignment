@@ -1,0 +1,7 @@
+openai
+python-dotenv
+rapidfuzz
+pandas
+scikit-learn
+jsonschema
+tqdm
