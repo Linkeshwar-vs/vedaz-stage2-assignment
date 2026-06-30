@@ -4,15 +4,11 @@
 
 This repository contains my submission for the **Vedaz AI Engineer – Stage 2 Technical Assignment**.
 
-The project consists of three scripts that together form a simple pipeline for creating, validating, and evaluating AI-generated astrology conversations.
-
 ### Tasks Implemented
 
 * **Task 1:** Chat Checker      -  scripts/checker.py
 * **Task 2:** Chat Generator    -  scripts/generator.py
 * **Task 3:** Quality Evaluator -  scripts/evaluator.py
-
-The implementation focuses on keeping the code modular, readable, and easy to extend while satisfying all assignment requirements.
 
 ---
 
@@ -41,8 +37,8 @@ vedaz-submission/
 │   ├── prompts.py
 │   └── config.py
 │
-├── tests/   
-│   ├───checker_tests                      - Description added below ( ADDITIONAL EVALUATION PERFORMED )
+├── tests/                                 - Description added below ( ADDITIONAL EVALUATION PERFORMED )
+│   ├───checker_tests                      
 │   │   │   run_checker_tests.py
 │   │   │
 │   │   ├───outputs
