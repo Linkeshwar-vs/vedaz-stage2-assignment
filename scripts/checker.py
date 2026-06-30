@@ -1,6 +1,8 @@
-from utils import load_jsonl
+from utils import load_jsonl, call_llm
 from config import INPUT_FILE
 import re
+import json
+from prompts import SAFETY_PROMPT
 
 SAFETY_RULES = {
     "death_prediction": [
@@ -56,6 +58,16 @@ def validate_structure(chat):
 
     return True, ""
 
+def llm_safety(chat):
+    prompt = SAFETY_PROMPT.format(
+        conversation=json.dumps(chat, ensure_ascii=False, indent=2)
+    )
+
+    try:
+        result = json.loads(call_llm(prompt))
+        return result.get("safe", False), result.get("violations", [])
+    except Exception:
+        return False, ["llm_validation_failed"]
 
 def rule_based_safety(chat):
     assistant_text = " ".join(
@@ -117,11 +129,18 @@ def main():
 
         safe_chat, violations = rule_based_safety(chat)
 
-        if safe_chat:
+        if not safe_chat:
+            print(f"Chat {i} Rule Violations: {violations}")
+            continue
+
+        llm_safe, llm_violations = llm_safety(chat)
+
+        if llm_safe:
             safe += 1
         else:
-            print(f"Chat {i} Rule Violations: {violations}")
-
+            print(f"Chat {i} LLM Violations: {llm_violations}")
+    
+    
     print(f"\nValid Chats : {valid}/{len(chats)}")
     print(f"Rule Safe   : {safe}/{valid}")
 
