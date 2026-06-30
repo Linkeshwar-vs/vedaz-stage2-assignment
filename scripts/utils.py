@@ -31,7 +31,11 @@ def normalize_text(text):
 
 
 def word_count(chat):
-    text = " ".join(msg["content"] for msg in chat["messages"])
+    text = " ".join(
+        msg["content"]
+        for msg in chat["messages"]
+        if msg["role"] != "system"
+    )
     return len(text.split())
 
 

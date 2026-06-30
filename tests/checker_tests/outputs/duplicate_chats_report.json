@@ -1,0 +1,18 @@
+{
+    "total_chats": 6,
+    "structure_valid": 6,
+    "safety_passed": 6,
+    "duplicate_chats": 2,
+    "duplicates": [
+        {
+            "chat_1": 1,
+            "chat_2": 3,
+            "similarity": 100.0
+        },
+        {
+            "chat_1": 5,
+            "chat_2": 6,
+            "similarity": 85.5
+        }
+    ]
+}

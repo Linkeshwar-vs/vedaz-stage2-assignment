@@ -1,7 +1,7 @@
 {
     "total_chats": 15,
-    "valid_chats": 15,
-    "safe_chats": 15,
+    "structure_valid": 15,
+    "safety_passed": 15,
     "duplicate_chats": 0,
     "duplicates": []
 }

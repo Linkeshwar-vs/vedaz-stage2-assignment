@@ -1,11 +1,16 @@
-from utils import load_jsonl, call_llm
 from config import INPUT_FILE
 import re
 import json
 from prompts import SAFETY_PROMPT
 
 from rapidfuzz import fuzz
-from utils import normalize_text
+from utils import (
+    call_llm,
+    load_jsonl, 
+    parse_json_response,
+    normalize_text,
+    word_count
+)
 from config import SIMILARITY_THRESHOLD
 
 from sklearn.model_selection import train_test_split
@@ -72,9 +77,13 @@ def llm_safety(chat):
     )
 
     try:
-        result = json.loads(call_llm(prompt))
+        response = call_llm(prompt)
+        result = parse_json_response(response)
         return result.get("safe", False), result.get("violations", [])
-    except Exception:
+    
+    except Exception as e:
+        print(f"LLM Parsing Error: {e}")
+        print(response)
         return False, ["llm_validation_failed"]
 
 
@@ -97,13 +106,15 @@ def find_duplicates(chats):
     processed = []
 
     for i, chat in enumerate(chats):
-        text = " ".join(
-            msg["content"]
-            for msg in chat["messages"]
-            if msg["role"] != "system"
+        text = normalize_text(
+            " ".join(
+                msg["content"]
+                for msg in chat["messages"]
+                if msg["role"] in ("user", "assistant")
+            )
         )
 
-        processed.append((i, normalize_text(text)))
+        processed.append((i, text))
 
     duplicates = []
 
@@ -113,17 +124,20 @@ def find_duplicates(chats):
         for j in range(i + 1, len(processed)):
             idx2, text2 = processed[j]
 
-            score = fuzz.ratio(text1, text2)
+            score = fuzz.token_set_ratio(text1, text2)
+
+            
 
             if score >= SIMILARITY_THRESHOLD:
                 duplicates.append({
                     "chat_1": idx1 + 1,
                     "chat_2": idx2 + 1,
-                    "similarity": score
+                    "similarity": round(score, 2)
                 })
 
-    return duplicates
+    
 
+    return duplicates
 
 def split_dataset(chats):
     train, test = train_test_split(
@@ -142,8 +156,8 @@ def split_dataset(chats):
 def generate_report(total, valid, safe, duplicates):
     report = {
         "total_chats": total,
-        "valid_chats": valid,
-        "safe_chats": safe,
+        "structure_valid": valid,
+        "safety_passed": safe,
         "duplicate_chats": len(duplicates),
         "duplicates": duplicates,
     }
@@ -151,10 +165,17 @@ def generate_report(total, valid, safe, duplicates):
     save_report(report, CHECKER_REPORT)
 
 
-def main():
-    chats = load_jsonl(INPUT_FILE)
+def main(input_file=INPUT_FILE):
+    chats = load_jsonl(input_file)
 
-    valid = 0
+    word_counts = {
+        i + 1: word_count(chat)
+        for i, chat in enumerate(chats)
+    }
+
+    print("\nWord Counts:")
+    print(word_counts)
+    valid = 0   
     safe = 0
 
     for i, chat in enumerate(chats, start=1):
@@ -200,7 +221,7 @@ def main():
     )
 
     print(f"\nValid Chats : {valid}/{len(chats)}")
-    print(f"Rule Safe   : {safe}/{valid}")
+    print(f"Safety Passed : {safe}/{valid}")
     print(f"Duplicates  : {len(duplicates)}")
     print(f"Train Chats : {len(train)}")
     print(f"Test Chats  : {len(test)}")
