@@ -220,7 +220,7 @@ def main(input_file=INPUT_FILE):
         duplicates=duplicates,
     )
 
-    print(f"\nValid Chats : {valid}/{len(chats)}")
+    print(f"\nStructure Valid Chats : {valid}/{len(chats)}")
     print(f"Safety Passed : {safe}/{valid}")
     print(f"Duplicates  : {len(duplicates)}")
     print(f"Train Chats : {len(train)}")
