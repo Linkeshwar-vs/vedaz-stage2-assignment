@@ -8,7 +8,16 @@ from rapidfuzz import fuzz
 from utils import normalize_text
 from config import SIMILARITY_THRESHOLD
 
+from sklearn.model_selection import train_test_split
 
+from config import (
+    TRAIN_FILE,
+    TEST_FILE,
+    CHECKER_REPORT,
+    TRAIN_SIZE,
+)
+
+from utils import save_jsonl, save_report
 
 SAFETY_RULES = {
     "death_prediction": [
@@ -150,6 +159,32 @@ def find_duplicates(chats):
     return duplicates
 
 
+def split_dataset(chats):
+    train, test = train_test_split(
+        chats,
+        train_size=TRAIN_SIZE,
+        random_state=42,
+        shuffle=True,
+    )
+
+    save_jsonl(train, TRAIN_FILE)
+    save_jsonl(test, TEST_FILE)
+
+    return train, test
+
+
+def generate_report(total, valid, safe, duplicates):
+    report = {
+        "total_chats": total,
+        "valid_chats": valid,
+        "safe_chats": safe,
+        "duplicate_chats": len(duplicates),
+        "duplicates": duplicates,
+    }
+
+    save_report(report, CHECKER_REPORT)
+
+
 def main():
     chats = load_jsonl(INPUT_FILE)
 
@@ -188,9 +223,22 @@ def main():
                 f"({dup['similarity']:.1f}%)"
             )
 
+
+    train, test = split_dataset(chats)
+
+    generate_report(
+        total=len(chats),
+        valid=valid,
+        safe=safe,
+        duplicates=duplicates,
+    )
+
     print(f"\nValid Chats : {valid}/{len(chats)}")
     print(f"Rule Safe   : {safe}/{valid}")
     print(f"Duplicates  : {len(duplicates)}")
+    print(f"Train Chats : {len(train)}")
+    print(f"Test Chats  : {len(test)}")
+    print("\nChecker report saved.")
 
 
 if __name__ == "__main__":
