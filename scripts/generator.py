@@ -9,6 +9,9 @@ from checker import (
     llm_safety,
 )
 
+from config import GENERATED_FILE
+from utils import save_jsonl, load_jsonl
+
 def generate_chat(topic):
     prompt = GENERATOR_PROMPT + f"\n\nTopic: {topic}"
 
@@ -35,17 +38,49 @@ def validate_generated_chat(chat):
 
     return True, ""
 
+def save_generated_chat(chat):
+    try:
+        chats = load_jsonl(GENERATED_FILE)
+    except FileNotFoundError:
+        chats = []
+
+    chats.append(chat)
+    save_jsonl(chats, GENERATED_FILE)
+
 def main():
-    chat = generate_chat("Career delay, Hindi")
+    topics = [
+        "Career delay, Hindi",
+        "Marriage compatibility, English",
+        "Business loss, English",
+        "Education stress, Hindi",
+        "Job change, English",
+        "Financial uncertainty, Hindi",
+        "Love marriage, English",
+        "Family conflicts, Hindi",
+        "Foreign travel, English",
+        "Health anxiety, Hindi",
+    ]
 
-    valid, reason = validate_generated_chat(chat)
+    accepted = 0
 
-    if valid:
-        print("✅ Chat passed validation.\n")
-        print(json.dumps(chat, indent=4, ensure_ascii=False))
-    else:
-        print(f"❌ Chat rejected: {reason}")
-        
+    for topic in topics:
+        try:
+            chat = generate_chat(topic)
+
+            valid, reason = validate_generated_chat(chat)
+
+            if valid:
+                save_generated_chat(chat)
+                accepted += 1
+                print(f"✅ {topic}")
+            else:
+                print(f"❌ {topic} -> {reason}")
+
+        except Exception as e:
+            print(f"❌ {topic} -> {e}")
+
+    print(f"\nGenerated {accepted} valid chats.")
+    
 
 if __name__ == "__main__":
     main()

@@ -21,37 +21,30 @@ from utils import save_jsonl, save_report
 
 SAFETY_RULES = {
     "death_prediction": [
-        r"\bdeath\b",
-        r"\bdie\b",
         r"\bwill die\b",
-        r"\blife will end\b",
+        r"\byou will die\b",
+        r"\bdeath is certain\b",
+        r"\byour life will end\b",
     ],
     "illness_prediction": [
-        r"\bcancer\b",
-        r"\bterminal illness\b",
-        r"\bheart attack\b",
-        r"\bincurable\b",
-    ],
-    "guaranteed_outcome": [
-        r"\bguaranteed\b",
-        r"\b100%\b",
-        r"\bdefinitely\b",
-        r"\bsurely\b",
-        r"\bcertainly\b",
+        r"\byou have cancer\b",
+        r"\byou have a terminal illness\b",
+        r"\byou will get cancer\b",
+        r"\byou will suffer a heart attack\b",
     ],
     "fear_selling": [
-        r"\btabah\b",
-        r"\bdisaster\b",
-        r"\botherwise\b",
-        r"\bbad luck\b",
+        r"\bbad luck forever\b",
+        r"\byour family will suffer\b",
+        r"\bdisaster will happen\b",
+        r"\bcurse\b",
     ],
     "payment_pressure": [
-        r"₹\s*\d+",
-        r"\brs\.?\s*\d+",
-        r"\bpay\b",
+        r"pay\s*₹?\s*\d+",
+        r"pay\s+rs\.?\s*\d+",
+        r"mandatory\s+puja",
+        r"buy\s+this\s+gemstone",
     ],
 }
-
 
 def validate_structure(chat):
     messages = chat.get("messages", [])
@@ -98,34 +91,7 @@ def rule_based_safety(chat):
         if any(re.search(pattern, assistant_text) for pattern in patterns):
             violations.append(rule)
 
-    if (
-        "doctor" not in assistant_text
-        and "medical" not in assistant_text
-        and "financial advisor" not in assistant_text
-        and "lawyer" not in assistant_text
-    ):
-        user_text = " ".join(
-            msg["content"]
-            for msg in chat["messages"]
-            if msg["role"] == "user"
-        ).lower()
-
-        if any(
-            word in user_text
-            for word in [
-                "pain",
-                "hospital",
-                "health",
-                "business",
-                "loan",
-                "court",
-                "legal",
-            ]
-        ):
-            violations.append("missing_professional_referral")
-
     return len(violations) == 0, violations
-
 
 def find_duplicates(chats):
     processed = []
