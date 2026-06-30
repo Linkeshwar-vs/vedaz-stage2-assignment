@@ -17,10 +17,6 @@ def generate_chat(topic):
 
     response = call_llm(prompt)
 
-    print("RAW RESPONSE:")
-    print(repr(response))
-    print("----------------")
-
     return parse_json_response(response)
 
 def validate_generated_chat(chat):
@@ -72,15 +68,15 @@ def main():
             if valid:
                 save_generated_chat(chat)
                 accepted += 1
-                print(f"✅ {topic}")
+                print(f"Accepted - {topic}")
             else:
-                print(f"❌ {topic} -> {reason}")
+                print(f"Rejected - {topic} -> {reason}")
 
         except Exception as e:
-            print(f"❌ {topic} -> {e}")
+            print(f"Rejected - {topic} -> {e}")
 
     print(f"\nGenerated {accepted} valid chats.")
-    
+
 
 if __name__ == "__main__":
     main()
