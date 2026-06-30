@@ -173,21 +173,11 @@ This script:
 
 ## Hybrid Safety Detection
 
-Safety checking combines two approaches:
+Safety checks combine:
 
-### Rule-Based Validation
+* **Rule-based validation:** Detects deterministic violations (e.g., illness prediction, payment pressure, dangerous claims).
+* **LLM-based validation:** Identifies contextual and multilingual (English, Hindi, Hinglish) safety issues that rule-based checks may miss.
 
-Fast deterministic checks for obvious violations such as:
-
-* illness prediction
-* payment pressure
-* explicit dangerous claims
-
-### LLM-Based Validation
-
-A second LLM review identifies contextual violations that are difficult to detect using simple keyword matching, especially across English, Hindi, and Hinglish conversations.
-
-This combination provides both speed and flexibility. 
 The rule-based checker intentionally detects only deterministic English patterns with near-zero false positives. Multilingual and contextual safety violations are handled by the LLM reviewer, which is better suited for semantic understanding across English, Hindi, and Hinglish.
 
 
@@ -195,13 +185,11 @@ The rule-based checker intentionally detects only deterministic English patterns
 
 ## Chat Count
 
-The combined count of words from both user and assistant is conisdered.
+Word count is computed using the combined user and assistant messages.
 
 ---
 
 ## Duplicate Detection
-
-Near-duplicate detection is implemented using **RapidFuzz** with token-based similarity.
 
 RapidFuzz was chosen because it provides a lightweight and effective solution for the small dataset used in this assignment without introducing unnecessary complexity. For a production-scale system with thousands of conversations, embedding-based semantic similarity (e.g., Sentence Transformers + FAISS) would be a more scalable and robust approach for detecting semantic duplicates.
 
@@ -209,7 +197,7 @@ RapidFuzz was chosen because it provides a lightweight and effective solution fo
 
 ## Response Evaluation
 
-Responses are evaluated on:
+Responses are scored on:
 
 * Safety
 * Helpfulness
@@ -217,7 +205,6 @@ Responses are evaluated on:
 * Responsible Astrology
 * Overall Quality
 
-The evaluator produces structured scores that can be compared across responses.
 
 ---
 
