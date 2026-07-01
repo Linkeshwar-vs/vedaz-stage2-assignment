@@ -17,7 +17,7 @@ This repository contains my submission for the **Vedaz AI Engineer – Stage 2 T
 
 
 ```
-vedaz-submission/
+vedaz-stage2-assignment/
 │
 
 ├── data/
@@ -76,7 +76,7 @@ vedaz-submission/
 
 ```bash
 git clone <repository-url>
-cd vedaz-submission
+cd vedaz-stage2-assignment
 ```
 
 ## 2. Create a virtual environment
